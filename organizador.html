@@ -1,0 +1,886 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Organizador</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,400;9..144,500;9..144,600;9..144,700&family=IBM+Plex+Sans:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet">
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<style>
+  :root{
+    --paper:#EEEBE2;
+    --paper-dim:#E2DECF;
+    --ink:#1F2A33;
+    --ink-soft:#5B6672;
+    --line:#C9C2AE;
+    --gold:#C8961E;
+    --teal:#2F6F6B;
+    --rust:#B5533C;
+    --plum:#6B4E71;
+    --slate:#3E5C76;
+    --olive:#6E7F3F;
+    --danger:#B5533C;
+    --radius:10px;
+    --shadow:0 1px 0 rgba(31,42,51,0.06), 0 8px 20px -12px rgba(31,42,51,0.25);
+  }
+  *{box-sizing:border-box;}
+  html,body{margin:0;padding:0;}
+  body{
+    background:
+      repeating-linear-gradient(180deg, transparent 0 39px, rgba(31,42,51,0.035) 39px 40px),
+      var(--paper);
+    color:var(--ink);
+    font-family:'IBM Plex Sans', sans-serif;
+    min-height:100vh;
+    -webkit-font-smoothing:antialiased;
+  }
+  .display{font-family:'Fraunces', serif;}
+  .mono{font-family:'IBM Plex Mono', monospace;}
+
+  a{color:inherit;}
+  button{font-family:inherit;}
+
+  /* ---------- Setup gate ---------- */
+  #setup{
+    min-height:100vh;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    padding:24px;
+  }
+  .setup-card{
+    background:var(--paper);
+    border:1px solid var(--line);
+    border-radius:var(--radius);
+    box-shadow:var(--shadow);
+    padding:36px 32px;
+    max-width:380px;
+    width:100%;
+    text-align:left;
+  }
+  .setup-card .stamp{
+    display:inline-block;
+    font-family:'IBM Plex Mono', monospace;
+    font-size:11px;
+    letter-spacing:.14em;
+    text-transform:uppercase;
+    color:var(--ink-soft);
+    border:1px solid var(--line);
+    padding:3px 8px;
+    border-radius:4px;
+    margin-bottom:16px;
+  }
+  .setup-card h1{
+    font-size:28px;
+    margin:0 0 8px;
+    font-weight:600;
+  }
+  .setup-card p{
+    color:var(--ink-soft);
+    font-size:14px;
+    line-height:1.5;
+    margin:0 0 22px;
+  }
+  .setup-card input{
+    width:100%;
+    padding:12px 14px;
+    border:1px solid var(--line);
+    border-radius:8px;
+    background:#fff;
+    font-family:'IBM Plex Mono', monospace;
+    font-size:15px;
+    color:var(--ink);
+    margin-bottom:12px;
+  }
+  .setup-card input:focus{outline:2px solid var(--gold); outline-offset:1px;}
+  .btn{
+    width:100%;
+    padding:12px 14px;
+    border:none;
+    border-radius:8px;
+    background:var(--ink);
+    color:var(--paper);
+    font-size:14px;
+    font-weight:600;
+    letter-spacing:.02em;
+    cursor:pointer;
+  }
+  .btn:hover{background:#33414d;}
+  .setup-note{
+    margin-top:16px;
+    font-size:12px;
+    color:var(--ink-soft);
+    line-height:1.5;
+  }
+
+  /* ---------- App shell ---------- */
+  #app{display:none; min-height:100vh; flex-direction:column;}
+  header.topbar{
+    display:flex;
+    align-items:center;
+    justify-content:space-between;
+    padding:18px 28px;
+    border-bottom:1px solid var(--line);
+    gap:16px;
+    flex-wrap:wrap;
+  }
+  .brand{display:flex; align-items:baseline; gap:10px;}
+  .brand h1{font-size:22px; margin:0; font-weight:600;}
+  .brand .tagline{font-size:12px; color:var(--ink-soft); font-family:'IBM Plex Mono',monospace;}
+  .sync-status{
+    display:flex; align-items:center; gap:10px;
+    font-size:12px; color:var(--ink-soft);
+  }
+  .sync-code-badge{
+    font-family:'IBM Plex Mono', monospace;
+    border:1px solid var(--line);
+    background:var(--paper-dim);
+    padding:4px 9px;
+    border-radius:6px;
+    letter-spacing:.03em;
+  }
+  .link-btn{
+    background:none; border:none; padding:0; cursor:pointer;
+    color:var(--ink-soft); text-decoration:underline; font-size:12px;
+  }
+  .link-btn:hover{color:var(--ink);}
+
+  .layout{
+    display:flex;
+    flex:1;
+    min-height:0;
+  }
+
+  /* ---------- Sidebar / folder tabs ---------- */
+  aside.sidebar{
+    width:230px;
+    flex-shrink:0;
+    padding:22px 0 22px 22px;
+    border-right:1px solid var(--line);
+  }
+  .sidebar h2{
+    font-size:11px;
+    text-transform:uppercase;
+    letter-spacing:.12em;
+    color:var(--ink-soft);
+    margin:0 22px 12px 0;
+    font-weight:600;
+  }
+  .cat-list{list-style:none; margin:0; padding:0;}
+  .cat-tab{
+    position:relative;
+    display:flex;
+    align-items:center;
+    justify-content:space-between;
+    gap:8px;
+    padding:11px 14px;
+    margin-bottom:7px;
+    margin-right:0;
+    border:1px solid var(--line);
+    border-right:none;
+    border-radius:8px 0 0 8px;
+    background:var(--paper-dim);
+    cursor:pointer;
+    font-size:14px;
+    font-weight:500;
+  }
+  .cat-tab .dot{width:9px;height:9px;border-radius:50%; flex-shrink:0;}
+  .cat-tab .name{flex:1; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; font-family:'Fraunces',serif; font-weight:500;}
+  .cat-tab .del{
+    opacity:0; border:none; background:none; color:var(--ink-soft); cursor:pointer; font-size:14px; line-height:1; padding:2px;
+  }
+  .cat-tab:hover .del{opacity:1;}
+  .cat-tab.active{
+    background:var(--paper);
+    border-color:var(--line);
+    box-shadow:var(--shadow);
+    transform:translateX(0);
+  }
+  .cat-tab.active::after{
+    content:"";
+    position:absolute;
+    right:-1px; top:0; bottom:0;
+    width:1px;
+    background:var(--paper);
+  }
+  .add-cat{
+    margin-top:10px;
+    display:flex;
+    gap:6px;
+    padding-right:22px;
+  }
+  .add-cat input{
+    flex:1; min-width:0;
+    padding:9px 10px;
+    border:1px dashed var(--line);
+    border-radius:6px;
+    background:transparent;
+    font-size:13px;
+    color:var(--ink);
+  }
+  .add-cat button{
+    border:1px solid var(--line);
+    background:var(--paper);
+    border-radius:6px;
+    padding:0 12px;
+    cursor:pointer;
+    font-size:16px;
+    color:var(--ink-soft);
+  }
+  .add-cat button:hover{color:var(--ink);}
+
+  /* ---------- Main content ---------- */
+  main.content{
+    flex:1;
+    padding:26px 34px 60px;
+    overflow-y:auto;
+  }
+  .content-header{
+    display:flex;
+    align-items:center;
+    gap:12px;
+    margin-bottom:22px;
+  }
+  .content-header .dot{width:12px;height:12px;border-radius:50%;}
+  .content-header h2{font-size:26px; margin:0; font-weight:600;}
+
+  .empty-state{
+    color:var(--ink-soft);
+    font-size:14px;
+    border:1px dashed var(--line);
+    border-radius:var(--radius);
+    padding:26px;
+    text-align:center;
+    max-width:480px;
+  }
+
+  .add-objective{
+    display:flex; gap:8px; margin-bottom:20px; max-width:480px;
+  }
+  .add-objective input{
+    flex:1;
+    padding:11px 13px;
+    border:1px solid var(--line);
+    border-radius:8px;
+    background:#fff;
+    font-size:14px;
+  }
+  .add-objective button{
+    padding:0 16px;
+    border:none;
+    border-radius:8px;
+    background:var(--ink);
+    color:var(--paper);
+    font-weight:600;
+    cursor:pointer;
+    font-size:13px;
+  }
+  .add-objective button:hover{background:#33414d;}
+
+  /* ---------- Objective card ---------- */
+  .objective{
+    background:var(--paper);
+    border:1px solid var(--line);
+    border-radius:var(--radius);
+    box-shadow:var(--shadow);
+    margin-bottom:16px;
+    max-width:640px;
+    overflow:hidden;
+  }
+  .objective-head{
+    display:flex;
+    align-items:center;
+    gap:14px;
+    padding:16px 18px;
+    cursor:pointer;
+  }
+  .objective-head .chevron{
+    color:var(--ink-soft);
+    font-size:12px;
+    transition:transform .15s ease;
+    flex-shrink:0;
+  }
+  .objective.open .chevron{transform:rotate(90deg);}
+  .objective-title{
+    flex:1;
+    min-width:0;
+    font-family:'Fraunces',serif;
+    font-size:17px;
+    font-weight:500;
+    overflow:hidden;
+    text-overflow:ellipsis;
+    white-space:nowrap;
+  }
+  .objective-title.done{color:var(--ink-soft); text-decoration:line-through;}
+  .obj-frac{
+    font-family:'IBM Plex Mono',monospace;
+    font-size:12px;
+    color:var(--ink-soft);
+    flex-shrink:0;
+  }
+  .obj-del{
+    border:none; background:none; color:var(--ink-soft); cursor:pointer; font-size:14px; opacity:0; flex-shrink:0;
+  }
+  .objective-head:hover .obj-del{opacity:1;}
+
+  /* ruler progress */
+  .ruler{
+    display:flex;
+    gap:2px;
+    padding:0 18px 14px;
+  }
+  .ruler .tick{
+    flex:1;
+    height:8px;
+    border-radius:2px;
+    background:var(--paper-dim);
+    border:1px solid var(--line);
+  }
+  .ruler .tick.filled{
+    border-color:transparent;
+  }
+  .ruler.empty{
+    padding:0 18px 14px;
+    font-size:12px;
+    color:var(--ink-soft);
+    font-style:italic;
+  }
+
+  .tasks{
+    display:none;
+    padding:0 18px 18px;
+    border-top:1px solid var(--line);
+  }
+  .objective.open .tasks{display:block; padding-top:12px;}
+  .task-row{
+    display:flex;
+    align-items:center;
+    gap:10px;
+    padding:6px 0;
+  }
+  .task-row input[type=checkbox]{
+    width:17px; height:17px;
+    accent-color:var(--teal);
+    flex-shrink:0;
+    cursor:pointer;
+  }
+  .task-text{
+    flex:1;
+    font-size:14px;
+    min-width:0;
+    word-break:break-word;
+  }
+  .task-text.done{color:var(--ink-soft); text-decoration:line-through;}
+  .task-del{
+    border:none; background:none; color:var(--ink-soft); cursor:pointer; font-size:13px; opacity:0; flex-shrink:0;
+  }
+  .task-row:hover .task-del{opacity:1;}
+  .add-task{
+    display:flex; gap:8px; margin-top:8px;
+  }
+  .add-task input{
+    flex:1;
+    padding:8px 10px;
+    border:1px dashed var(--line);
+    border-radius:6px;
+    background:transparent;
+    font-size:13px;
+  }
+  .add-task button{
+    border:1px solid var(--line);
+    background:var(--paper);
+    border-radius:6px;
+    padding:0 12px;
+    cursor:pointer;
+    color:var(--ink-soft);
+    font-size:15px;
+  }
+  .add-task button:hover{color:var(--ink);}
+
+  footer.statusbar{
+    padding:9px 28px;
+    border-top:1px solid var(--line);
+    font-size:11.5px;
+    color:var(--ink-soft);
+    font-family:'IBM Plex Mono',monospace;
+    display:flex;
+    justify-content:space-between;
+  }
+
+  @media (max-width: 760px){
+    .layout{flex-direction:column;}
+    aside.sidebar{
+      width:auto;
+      border-right:none;
+      border-bottom:1px solid var(--line);
+      padding:16px 16px 18px;
+    }
+    .sidebar h2{margin-right:0;}
+    .cat-list{display:flex; flex-wrap:wrap; gap:8px;}
+    .cat-tab{
+      border-radius:8px;
+      border-right:1px solid var(--line);
+      margin:0;
+    }
+    .cat-tab.active::after{display:none;}
+    .add-cat{padding-right:0; width:100%; margin-top:12px;}
+    main.content{padding:20px 18px 50px;}
+  }
+
+  :focus-visible{outline:2px solid var(--gold); outline-offset:2px;}
+  @media (prefers-reduced-motion: reduce){
+    *{transition:none !important;}
+  }
+</style>
+</head>
+<body>
+
+<!-- ===== Pantalla de configuración de sincronización ===== -->
+<div id="setup">
+  <div class="setup-card">
+    <span class="stamp">Bitácora personal</span>
+    <h1 class="display">Organizador</h1>
+    <p>Ingresa un código de sincronización. Usa el mismo código en tu celular y en tu computador para ver siempre los mismos datos.</p>
+    <input id="code-input" type="text" placeholder="ej: danny-2026" autocomplete="off" autocapitalize="off">
+    <button class="btn" id="code-submit">Continuar</button>
+    <p class="setup-note" id="setup-error"></p>
+  </div>
+</div>
+
+<!-- ===== App principal ===== -->
+<div id="app">
+  <header class="topbar">
+    <div class="brand">
+      <h1 class="display">Organizador</h1>
+      <span class="tagline">categorías &middot; objetivos &middot; tareas</span>
+    </div>
+    <div class="sync-status">
+      <span>código:</span>
+      <span class="sync-code-badge" id="code-badge"></span>
+      <span id="status-text">—</span>
+      <button class="link-btn" id="change-code">cambiar</button>
+    </div>
+  </header>
+
+  <div class="layout">
+    <aside class="sidebar">
+      <h2>Categorías</h2>
+      <ul class="cat-list" id="cat-list"></ul>
+      <div class="add-cat">
+        <input id="new-cat-input" type="text" placeholder="Nueva categoría">
+        <button id="new-cat-btn" title="Agregar categoría">+</button>
+      </div>
+    </aside>
+
+    <main class="content" id="content"></main>
+  </div>
+
+  <footer class="statusbar">
+    <span id="footer-left">Organizador</span>
+    <span id="footer-right"></span>
+  </footer>
+</div>
+
+<script>
+(function(){
+  "use strict";
+
+  // ---------- Configuración de Supabase ----------
+  const SUPABASE_URL = "https://bcafkjudqgwssxsloibm.supabase.co";
+  const SUPABASE_ANON_KEY = "sb_publishable_guHRcKGSqBgw38GJ-2s1-Q_8G8jbC88";
+
+  const sb = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+
+  const ACCENTS = ["gold","teal","rust","plum","slate","olive"];
+
+  let SYNC_CODE = null;
+  let state = { categories: [] };
+  let activeCategoryId = null;
+  let saveTimer = null;
+
+  // ---------- Utilidades ----------
+  function uid(){
+    if (window.crypto && crypto.randomUUID) return crypto.randomUUID();
+    return 'id-' + Math.random().toString(36).slice(2) + Date.now().toString(36);
+  }
+  function accentFor(index){ return ACCENTS[index % ACCENTS.length]; }
+  function escapeHtml(str){
+    return String(str).replace(/[&<>"']/g, c => ({
+      '&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'
+    }[c]));
+  }
+  function nowLabel(){
+    const d = new Date();
+    return d.toLocaleTimeString('es-CL', {hour:'2-digit', minute:'2-digit'});
+  }
+  function setStatus(text){
+    document.getElementById('status-text').textContent = text;
+  }
+
+  // ---------- Setup / código de sincronización ----------
+  function getCodeFromUrl(){
+    const params = new URLSearchParams(window.location.search);
+    return params.get('code');
+  }
+  function setCodeInUrl(code){
+    const url = new URL(window.location.href);
+    url.searchParams.set('code', code);
+    window.history.replaceState(null, '', url.toString());
+  }
+
+  function showSetup(){
+    document.getElementById('setup').style.display = 'flex';
+    document.getElementById('app').style.display = 'none';
+  }
+  function showApp(){
+    document.getElementById('setup').style.display = 'none';
+    document.getElementById('app').style.display = 'flex';
+  }
+
+  document.getElementById('code-submit').addEventListener('click', submitCode);
+  document.getElementById('code-input').addEventListener('keydown', e => {
+    if (e.key === 'Enter') submitCode();
+  });
+  function submitCode(){
+    const input = document.getElementById('code-input');
+    const code = input.value.trim();
+    if (!code){
+      document.getElementById('setup-error').textContent = 'Escribe un código antes de continuar.';
+      return;
+    }
+    startWithCode(code);
+  }
+
+  document.getElementById('change-code').addEventListener('click', () => {
+    const url = new URL(window.location.href);
+    url.searchParams.delete('code');
+    window.history.replaceState(null, '', url.toString());
+    SYNC_CODE = null;
+    document.getElementById('code-input').value = '';
+    showSetup();
+  });
+
+  async function startWithCode(code){
+    SYNC_CODE = code;
+    setCodeInUrl(code);
+    document.getElementById('code-badge').textContent = code;
+    showApp();
+    await loadData();
+    render();
+  }
+
+  // ---------- Carga y guardado ----------
+  async function loadData(){
+    setStatus('Cargando…');
+    try{
+      const { data, error } = await sb
+        .from('organizador_data')
+        .select('data')
+        .eq('sync_code', SYNC_CODE)
+        .maybeSingle();
+      if (error) throw error;
+      if (data && data.data && Array.isArray(data.data.categories)){
+        state.categories = data.data.categories;
+      } else {
+        state.categories = [];
+      }
+      if (state.categories.length && !activeCategoryId){
+        activeCategoryId = state.categories[0].id;
+      }
+      setStatus('Sincronizado ' + nowLabel());
+    } catch(err){
+      console.error(err);
+      setStatus('No se pudo cargar (revisa tu conexión)');
+    }
+  }
+
+  function scheduleSave(){
+    setStatus('Guardando…');
+    clearTimeout(saveTimer);
+    saveTimer = setTimeout(saveData, 500);
+  }
+
+  async function saveData(){
+    try{
+      const { error } = await sb
+        .from('organizador_data')
+        .upsert({
+          sync_code: SYNC_CODE,
+          data: { categories: state.categories },
+          updated_at: new Date().toISOString()
+        }, { onConflict: 'sync_code' });
+      if (error) throw error;
+      setStatus('Guardado ' + nowLabel());
+    } catch(err){
+      console.error(err);
+      setStatus('Error al guardar — reintenta');
+    }
+  }
+
+  // ---------- Acciones sobre datos ----------
+  function addCategory(name){
+    const cat = { id: uid(), name, objectives: [] };
+    state.categories.push(cat);
+    activeCategoryId = cat.id;
+    scheduleSave();
+    render();
+  }
+  function deleteCategory(id){
+    if (!confirm('¿Eliminar esta categoría y todo lo que contiene?')) return;
+    state.categories = state.categories.filter(c => c.id !== id);
+    if (activeCategoryId === id){
+      activeCategoryId = state.categories.length ? state.categories[0].id : null;
+    }
+    scheduleSave();
+    render();
+  }
+  function addObjective(catId, title){
+    const cat = state.categories.find(c => c.id === catId);
+    if (!cat) return;
+    cat.objectives.push({ id: uid(), title, open:false, tasks: [] });
+    scheduleSave();
+    render();
+  }
+  function deleteObjective(catId, objId){
+    const cat = state.categories.find(c => c.id === catId);
+    if (!cat) return;
+    cat.objectives = cat.objectives.filter(o => o.id !== objId);
+    scheduleSave();
+    render();
+  }
+  function toggleObjectiveOpen(catId, objId){
+    const cat = state.categories.find(c => c.id === catId);
+    const obj = cat && cat.objectives.find(o => o.id === objId);
+    if (!obj) return;
+    obj.open = !obj.open;
+    render();
+  }
+  function addTask(catId, objId, text){
+    const cat = state.categories.find(c => c.id === catId);
+    const obj = cat && cat.objectives.find(o => o.id === objId);
+    if (!obj) return;
+    obj.tasks.push({ id: uid(), text, done:false });
+    scheduleSave();
+    render();
+  }
+  function toggleTask(catId, objId, taskId){
+    const cat = state.categories.find(c => c.id === catId);
+    const obj = cat && cat.objectives.find(o => o.id === objId);
+    const task = obj && obj.tasks.find(t => t.id === taskId);
+    if (!task) return;
+    task.done = !task.done;
+    scheduleSave();
+    render();
+  }
+  function deleteTask(catId, objId, taskId){
+    const cat = state.categories.find(c => c.id === catId);
+    const obj = cat && cat.objectives.find(o => o.id === objId);
+    if (!obj) return;
+    obj.tasks = obj.tasks.filter(t => t.id !== taskId);
+    scheduleSave();
+    render();
+  }
+
+  // ---------- Render ----------
+  function render(){
+    renderSidebar();
+    renderContent();
+  }
+
+  function renderSidebar(){
+    const list = document.getElementById('cat-list');
+    list.innerHTML = '';
+    state.categories.forEach((cat, i) => {
+      const accent = accentFor(i);
+      const li = document.createElement('li');
+      li.className = 'cat-tab' + (cat.id === activeCategoryId ? ' active' : '');
+      li.innerHTML = `
+        <span class="dot" style="background:var(--${accent})"></span>
+        <span class="name">${escapeHtml(cat.name)}</span>
+        <button class="del" title="Eliminar categoría" data-action="del-cat" data-cat="${cat.id}">✕</button>
+      `;
+      li.addEventListener('click', (e) => {
+        if (e.target.closest('[data-action="del-cat"]')) return;
+        activeCategoryId = cat.id;
+        render();
+      });
+      list.appendChild(li);
+    });
+    list.querySelectorAll('[data-action="del-cat"]').forEach(btn => {
+      btn.addEventListener('click', (e) => {
+        e.stopPropagation();
+        deleteCategory(btn.dataset.cat);
+      });
+    });
+  }
+
+  document.getElementById('new-cat-btn').addEventListener('click', submitNewCategory);
+  document.getElementById('new-cat-input').addEventListener('keydown', e => {
+    if (e.key === 'Enter') submitNewCategory();
+  });
+  function submitNewCategory(){
+    const input = document.getElementById('new-cat-input');
+    const name = input.value.trim();
+    if (!name) return;
+    addCategory(name);
+    input.value = '';
+  }
+
+  function renderContent(){
+    const content = document.getElementById('content');
+    content.innerHTML = '';
+
+    if (!state.categories.length){
+      content.innerHTML = `<div class="empty-state">Aún no tienes categorías. Crea la primera desde el panel de la izquierda — por ejemplo "Trabajo", "Salud" o "Finanzas".</div>`;
+      updateFooter();
+      return;
+    }
+
+    const catIndex = state.categories.findIndex(c => c.id === activeCategoryId);
+    const cat = catIndex >= 0 ? state.categories[catIndex] : state.categories[0];
+    if (!cat){ updateFooter(); return; }
+    activeCategoryId = cat.id;
+    const accent = accentFor(Math.max(catIndex,0));
+
+    const header = document.createElement('div');
+    header.className = 'content-header';
+    header.innerHTML = `<span class="dot" style="background:var(--${accent})"></span><h2 class="display">${escapeHtml(cat.name)}</h2>`;
+    content.appendChild(header);
+
+    const addObj = document.createElement('div');
+    addObj.className = 'add-objective';
+    addObj.innerHTML = `
+      <input type="text" placeholder="Nuevo objetivo en esta categoría" id="new-obj-input">
+      <button id="new-obj-btn">Agregar</button>
+    `;
+    content.appendChild(addObj);
+    addObj.querySelector('#new-obj-btn').addEventListener('click', () => submitNewObjective(cat.id));
+    addObj.querySelector('#new-obj-input').addEventListener('keydown', e => {
+      if (e.key === 'Enter') submitNewObjective(cat.id);
+    });
+
+    if (!cat.objectives.length){
+      const empty = document.createElement('div');
+      empty.className = 'empty-state';
+      empty.textContent = 'Sin objetivos todavía. Agrega uno arriba para empezar a sumar tareas.';
+      content.appendChild(empty);
+    }
+
+    cat.objectives.forEach(obj => {
+      content.appendChild(renderObjective(cat.id, obj));
+    });
+
+    updateFooter();
+  }
+
+  function submitNewObjective(catId){
+    const input = document.getElementById('new-obj-input');
+    const title = input.value.trim();
+    if (!title) return;
+    addObjective(catId, title);
+  }
+
+  function renderObjective(catId, obj){
+    const wrap = document.createElement('div');
+    wrap.className = 'objective' + (obj.open ? ' open' : '');
+
+    const total = obj.tasks.length;
+    const done = obj.tasks.filter(t => t.done).length;
+    const allDone = total > 0 && done === total;
+
+    const head = document.createElement('div');
+    head.className = 'objective-head';
+    head.innerHTML = `
+      <span class="chevron">▶</span>
+      <span class="objective-title${allDone ? ' done' : ''}">${escapeHtml(obj.title)}</span>
+      <span class="obj-frac">${done}/${total}</span>
+      <button class="obj-del" title="Eliminar objetivo" data-action="del-obj">✕</button>
+    `;
+    head.addEventListener('click', (e) => {
+      if (e.target.closest('[data-action="del-obj"]')) return;
+      toggleObjectiveOpen(catId, obj.id);
+    });
+    head.querySelector('[data-action="del-obj"]').addEventListener('click', (e) => {
+      e.stopPropagation();
+      deleteObjective(catId, obj.id);
+    });
+    wrap.appendChild(head);
+
+    if (total > 0){
+      const ruler = document.createElement('div');
+      ruler.className = 'ruler';
+      for (let i=0;i<total;i++){
+        const tick = document.createElement('div');
+        tick.className = 'tick' + (i < done ? ' filled' : '');
+        if (i < done) tick.style.background = 'var(--teal)';
+        ruler.appendChild(tick);
+      }
+      wrap.appendChild(ruler);
+    } else {
+      const ruler = document.createElement('div');
+      ruler.className = 'ruler empty';
+      ruler.textContent = 'Sin tareas aún';
+      wrap.appendChild(ruler);
+    }
+
+    const tasksWrap = document.createElement('div');
+    tasksWrap.className = 'tasks';
+    obj.tasks.forEach(task => {
+      const row = document.createElement('div');
+      row.className = 'task-row';
+      row.innerHTML = `
+        <input type="checkbox" ${task.done ? 'checked' : ''} data-action="toggle-task" data-task="${task.id}">
+        <span class="task-text${task.done ? ' done' : ''}">${escapeHtml(task.text)}</span>
+        <button class="task-del" title="Eliminar tarea" data-action="del-task" data-task="${task.id}">✕</button>
+      `;
+      row.querySelector('[data-action="toggle-task"]').addEventListener('change', () => toggleTask(catId, obj.id, task.id));
+      row.querySelector('[data-action="del-task"]').addEventListener('click', () => deleteTask(catId, obj.id, task.id));
+      tasksWrap.appendChild(row);
+    });
+
+    const addTaskRow = document.createElement('div');
+    addTaskRow.className = 'add-task';
+    addTaskRow.innerHTML = `
+      <input type="text" placeholder="Nueva tarea">
+      <button title="Agregar tarea">+</button>
+    `;
+    const taskInput = addTaskRow.querySelector('input');
+    const taskBtn = addTaskRow.querySelector('button');
+    function submitTask(){
+      const text = taskInput.value.trim();
+      if (!text) return;
+      addTask(catId, obj.id, text);
+    }
+    taskBtn.addEventListener('click', submitTask);
+    taskInput.addEventListener('keydown', e => { if (e.key === 'Enter') submitTask(); });
+    tasksWrap.appendChild(addTaskRow);
+
+    wrap.appendChild(tasksWrap);
+    return wrap;
+  }
+
+  function updateFooter(){
+    const totalObjectives = state.categories.reduce((n,c) => n + c.objectives.length, 0);
+    const totalTasks = state.categories.reduce((n,c) => n + c.objectives.reduce((m,o) => m + o.tasks.length, 0), 0);
+    const doneTasks = state.categories.reduce((n,c) => n + c.objectives.reduce((m,o) => m + o.tasks.filter(t=>t.done).length, 0), 0);
+    document.getElementById('footer-right').textContent =
+      `${state.categories.length} categorías · ${totalObjectives} objetivos · ${doneTasks}/${totalTasks} tareas`;
+  }
+
+  // ---------- Arranque ----------
+  (function init(){
+    const codeFromUrl = getCodeFromUrl();
+    if (codeFromUrl){
+      document.getElementById('code-input').value = codeFromUrl;
+      startWithCode(codeFromUrl);
+    } else {
+      showSetup();
+    }
+  })();
+
+})();
+</script>
+</body>
+</html>
