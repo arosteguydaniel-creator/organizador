@@ -499,15 +499,377 @@
   .view-toggle button + button{ border-left:1px solid var(--line); }
   .view-toggle button.active{ background:var(--ink); color:var(--paper); }
 
+  .inbox-panel,
+  .board-panel{
+    background:rgba(255,255,255,0.28);
+    border:1px solid var(--line);
+    border-radius:16px;
+    box-shadow:var(--shadow);
+    padding:18px;
+    margin-bottom:20px;
+    max-width:980px;
+  }
+  .inbox-header,
+  .board-header{
+    display:flex;
+    align-items:center;
+    justify-content:space-between;
+    gap:12px;
+    margin-bottom:16px;
+    flex-wrap:wrap;
+  }
+  .inbox-header h3,
+  .board-header h3{
+    margin:0;
+    font-size:18px;
+    font-weight:600;
+  }
+  .inbox-form{
+    display:grid;
+    grid-template-columns:1.7fr 1fr 1fr auto;
+    gap:10px;
+    margin-bottom:16px;
+  }
+  .inbox-form textarea,
+  .inbox-form select,
+  .inbox-form button,
+  .board-card select,
+  .board-card button{
+    font:inherit;
+  }
+  .inbox-form textarea,
+  .inbox-form select{
+    width:100%;
+    border:1px solid var(--line);
+    border-radius:10px;
+    background:#fff;
+    padding:10px 12px;
+    color:var(--ink);
+  }
+  .inbox-form textarea{
+    min-height:70px;
+    resize:vertical;
+  }
+  .inbox-form button,
+  .board-card button{
+    border:none;
+    border-radius:10px;
+    padding:10px 14px;
+    background:var(--ink);
+    color:var(--paper);
+    cursor:pointer;
+    font-weight:600;
+  }
+  .inbox-items{
+    display:grid;
+    gap:10px;
+  }
+  .inbox-item{
+    display:flex;
+    justify-content:space-between;
+    gap:12px;
+    align-items:center;
+    background:rgba(255,255,255,0.45);
+    border:1px solid var(--line);
+    border-radius:12px;
+    padding:12px 14px;
+  }
+  .inbox-item p{
+    margin:0;
+    color:var(--ink);
+    line-height:1.5;
+    flex:1;
+  }
+  .inbox-item small{
+    display:block;
+    color:var(--ink-soft);
+    margin-top:6px;
+  }
+  .inbox-actions{
+    display:flex;
+    align-items:center;
+    gap:8px;
+    flex-wrap:wrap;
+  }
+  .inbox-actions select{
+    border:1px solid var(--line);
+    border-radius:8px;
+    background:#fff;
+    color:var(--ink);
+    padding:8px 10px;
+  }
+  .inbox-item button{
+    border:none;
+    border-radius:8px;
+    background:var(--gold);
+    color:#fff;
+    padding:8px 10px;
+    cursor:pointer;
+    font-weight:600;
+  }
+
+  .board-columns{
+    display:grid;
+    grid-template-columns:repeat(4, minmax(220px, 1fr));
+    gap:16px;
+  }
+  .board-column{
+    background:rgba(255,255,255,0.26);
+    border:1px solid var(--line);
+    border-radius:16px;
+    min-height:300px;
+    padding:12px;
+  }
+  .board-column-header{
+    display:flex;
+    justify-content:space-between;
+    align-items:center;
+    margin-bottom:12px;
+    padding:0 4px;
+  }
+  .board-column-header h4{
+    margin:0;
+    font-size:14px;
+    letter-spacing:.06em;
+    text-transform:uppercase;
+    color:var(--ink-soft);
+  }
+  .board-count{
+    display:inline-flex;
+    align-items:center;
+    justify-content:center;
+    border-radius:999px;
+    min-width:24px;
+    height:24px;
+    color:#fff;
+    background:var(--ink);
+    font-size:11px;
+    font-weight:700;
+  }
+  .board-list{
+    display:grid;
+    gap:10px;
+  }
+  .board-card{
+    background:#fff;
+    border:1px solid var(--line);
+    border-radius:12px;
+    box-shadow:0 6px 12px -10px rgba(31,42,51,0.3);
+    padding:12px;
+    display:grid;
+    gap:8px;
+  }
+  .board-card.urgent{
+    border-color:rgba(181,83,60,0.5);
+    background:rgba(181,83,60,0.04);
+  }
+  .board-card-top{
+    display:flex;
+    justify-content:space-between;
+    align-items:center;
+    gap:8px;
+  }
+  .board-card-tag{
+    display:inline-flex;
+    align-items:center;
+    border-radius:999px;
+    padding:4px 8px;
+    font-size:10px;
+    font-weight:700;
+    letter-spacing:.06em;
+    text-transform:uppercase;
+    background:rgba(47,111,107,0.1);
+    color:var(--teal);
+  }
+  .board-card-tag.urgent{
+    background:rgba(181,83,60,0.12);
+    color:var(--danger);
+  }
+  .board-card-title{
+    margin:0;
+    font-size:14px;
+    line-height:1.4;
+    font-weight:600;
+  }
+  .board-card-meta{
+    margin:0;
+    font-size:11px;
+    color:var(--ink-soft);
+    line-height:1.4;
+  }
+  .board-card-actions{
+    display:grid;
+    gap:8px;
+    margin-top:6px;
+  }
+  .board-card-actions label{
+    font-size:10px;
+    letter-spacing:.08em;
+    text-transform:uppercase;
+    color:var(--ink-soft);
+  }
+  .board-card select{
+    appearance:none;
+    width:100%;
+    border:1px solid var(--line);
+    border-radius:8px;
+    background:#fff;
+    color:var(--ink);
+    padding:8px 10px;
+  }
+
   /* ---------- Organigrama ---------- */
   #chart-view{
     display:none;
     flex:1;
     overflow:auto;
-    padding:30px 24px;
+    padding:30px 24px 40px;
+    background:linear-gradient(180deg, rgba(255,255,255,0.12), rgba(255,255,255,0));
   }
-  #chart-view svg text{ font-family:'IBM Plex Sans', sans-serif; }
-  #chart-view .chart-empty{
+  .chart-shell{
+    width:100%;
+    display:flex;
+    flex-direction:column;
+    gap:18px;
+  }
+  .chart-root{
+    align-self:flex-start;
+    padding:10px 14px;
+    border-radius:16px;
+    border:1px solid var(--line);
+    background:var(--ink);
+    color:var(--paper);
+    box-shadow:var(--shadow);
+    font-weight:700;
+    letter-spacing:.02em;
+  }
+  .chart-columns{
+    display:flex;
+    gap:18px;
+    align-items:flex-start;
+    justify-content:flex-start;
+    flex-wrap:wrap;
+  }
+  .chart-column{
+    display:flex;
+    flex-direction:column;
+    gap:14px;
+    width:min(260px, 32vw);
+    min-width:200px;
+    flex:0 0 auto;
+  }
+  .chart-category{
+    --cat-accent: var(--gold);
+    border:1px solid rgba(30,41,51,0.12);
+    border-radius:16px;
+    background:linear-gradient(180deg, rgba(255,255,255,0.9), rgba(255,255,255,0.7));
+    box-shadow:0 12px 22px -18px rgba(15,23,42,0.35);
+    overflow:hidden;
+    transition:transform .16s ease, box-shadow .16s ease;
+  }
+  .chart-category:hover{
+    transform:translateY(-1px);
+    box-shadow:0 14px 26px -18px rgba(15,23,42,0.45);
+  }
+  .chart-category-head{
+    display:flex;
+    align-items:center;
+    justify-content:space-between;
+    gap:10px;
+    width:100%;
+    padding:12px 14px;
+    border:none;
+    background:linear-gradient(135deg, var(--cat-accent), color-mix(in srgb, var(--cat-accent) 85%, white));
+    color:#fff;
+    font:inherit;
+    font-size:13px;
+    font-weight:700;
+    cursor:pointer;
+    text-align:left;
+  }
+  .chart-category-head .meta{
+    display:inline-flex;
+    align-items:center;
+    justify-content:center;
+    min-width:28px;
+    height:24px;
+    border-radius:999px;
+    background:rgba(255,255,255,0.16);
+    font-size:11px;
+    font-weight:700;
+  }
+  .chart-objectives{
+    display:flex;
+    flex-direction:column;
+    gap:10px;
+    padding:10px 10px 12px;
+  }
+  .chart-objective{
+    border:1px solid rgba(30,41,51,0.12);
+    border-radius:12px;
+    background:rgba(255,255,255,0.62);
+    overflow:hidden;
+  }
+  .chart-objective-head{
+    display:flex;
+    align-items:center;
+    justify-content:space-between;
+    gap:10px;
+    width:100%;
+    border:none;
+    background:transparent;
+    color:var(--ink);
+    padding:10px 10px;
+    cursor:pointer;
+    text-align:left;
+    font:inherit;
+    font-size:12px;
+    font-weight:600;
+  }
+  .chart-objective-head .label{
+    flex:1;
+    line-height:1.35;
+  }
+  .chart-objective-head .count{
+    font-size:10px;
+    background:rgba(28,37,45,0.08);
+    border-radius:999px;
+    padding:3px 7px;
+    color:var(--ink-soft);
+    font-weight:700;
+  }
+  .chart-tasks{
+    display:flex;
+    flex-direction:column;
+    gap:8px;
+    padding:0 10px 10px;
+  }
+  .chart-task{
+    display:block;
+    width:100%;
+    border:1px solid rgba(28,37,45,0.18);
+    border-radius:9px;
+    background:rgba(255,255,255,0.82);
+    color:var(--ink);
+    font:inherit;
+    font-size:11.5px;
+    text-align:left;
+    padding:8px 10px;
+    cursor:pointer;
+    line-height:1.35;
+    white-space:normal;
+    overflow-wrap:anywhere;
+  }
+  .chart-task.urgent{
+    background:rgba(181,83,60,0.08);
+    border-color:rgba(181,83,60,0.4);
+  }
+  .chart-task.done{
+    background:rgba(22, 101, 52, 0.06);
+    color:var(--ink-soft);
+    text-decoration:line-through;
+  }
+  .chart-empty{
     color:var(--ink-soft);
     font-size:14px;
     border:1px dashed var(--line);
@@ -560,6 +922,8 @@
     .view-toggle{width:100%; justify-content:stretch;}
     .view-toggle button{flex:1;}
     .sync-status{width:100%; justify-content:space-between; flex-wrap:wrap;}
+    .inbox-form{grid-template-columns:1fr;}
+    .board-columns{grid-template-columns:1fr;}
     .statusbar{padding:8px 14px; gap:8px; flex-wrap:wrap;}
   }
 
@@ -635,10 +999,10 @@
   const ACCENTS = ["gold","teal","rust","plum","slate","olive"];
 
   let SYNC_CODE = null;
-  let state = { categories: [] };
+  let state = { categories: [], notes: [] };
   let activeCategoryId = null;
   let saveTimer = null;
-  let currentView = 'list'; // 'list' | 'chart'
+  let currentView = 'list'; // 'list' | 'board' | 'chart'
   let focusTaskId = null;
   let urgentFilter = 'all';
 
@@ -858,6 +1222,21 @@
   }
 
   // ---------- Carga y guardado ----------
+  function normalizeState(){
+    state.categories.forEach(cat => {
+      if (!Array.isArray(cat.objectives)) cat.objectives = [];
+      cat.objectives.forEach(obj => {
+        if (!Array.isArray(obj.tasks)) obj.tasks = [];
+        obj.tasks.forEach(task => {
+          task.urgent = Boolean(task.urgent);
+          task.done = Boolean(task.done);
+          task.status = task.status || (task.done ? 'done' : 'backlog');
+        });
+      });
+    });
+    state.notes = Array.isArray(state.notes) ? state.notes : [];
+  }
+
   async function loadData(){
     setStatus('Cargando…');
     try{
@@ -869,9 +1248,12 @@
       if (error) throw error;
       if (data && data.data && Array.isArray(data.data.categories) && data.data.categories.length){
         state.categories = data.data.categories;
+        state.notes = Array.isArray(data.data.notes) ? data.data.notes : [];
       } else {
         state.categories = JSON.parse(JSON.stringify(ORGANIZER_SEED));
+        state.notes = [];
       }
+      normalizeState();
       if (state.categories.length && !activeCategoryId){
         activeCategoryId = state.categories[0].id;
       }
@@ -882,6 +1264,8 @@
     } catch(err){
       console.error(err);
       state.categories = JSON.parse(JSON.stringify(ORGANIZER_SEED));
+      state.notes = [];
+      normalizeState();
       if (state.categories.length && !activeCategoryId){
         activeCategoryId = state.categories[0].id;
       }
@@ -902,7 +1286,7 @@
         .from('organizador_data')
         .upsert({
           sync_code: SYNC_CODE,
-          data: { categories: state.categories },
+          data: { categories: state.categories, notes: state.notes },
           updated_at: new Date().toISOString()
         }, { onConflict: 'sync_code' });
       if (error) throw error;
@@ -1011,7 +1395,7 @@
     document.getElementById('view-chart-btn').classList.toggle('active', currentView === 'chart');
     document.querySelector('aside.sidebar').style.display = currentView === 'list' ? '' : 'none';
     document.getElementById('content').style.display = currentView === 'list' ? '' : 'none';
-    document.getElementById('chart-view').style.display = currentView === 'list' ? 'none' : 'block';
+    document.getElementById('chart-view').style.display = currentView === 'chart' ? 'block' : 'none';
 
     if (currentView === 'list'){
       renderSidebar();
@@ -1091,6 +1475,8 @@
     header.innerHTML = `<span class="dot" style="background:var(--${accent})"></span><h2 class="display">${escapeHtml(cat.name)}</h2>`;
     content.appendChild(header);
 
+    content.appendChild(renderInboxPanel());
+
     const filterRow = document.createElement('div');
     filterRow.className = 'filter-row';
     filterRow.innerHTML = `
@@ -1146,6 +1532,104 @@
     const title = input.value.trim();
     if (!title) return;
     addObjective(catId, title);
+  }
+
+  function renderInboxPanel(){
+    const panel = document.createElement('section');
+    panel.className = 'inbox-panel';
+
+    const header = document.createElement('div');
+    header.className = 'inbox-header';
+    header.innerHTML = '<h3>Notas emergentes</h3>';
+    panel.appendChild(header);
+
+    const form = document.createElement('div');
+    form.className = 'inbox-form';
+    form.innerHTML = `
+      <textarea id="inbox-note-text" placeholder="Escribe algo breve que te haya surgido..."></textarea>
+      <select id="inbox-category-select">
+        <option value="">Categoría</option>
+        ${state.categories.map(cat => `<option value="${cat.id}">${escapeHtml(cat.name)}</option>`).join('')}
+      </select>
+      <select id="inbox-objective-select">
+        <option value="">Objetivo</option>
+      </select>
+      <button id="inbox-add-btn">Lanzar</button>
+    `;
+    panel.appendChild(form);
+
+    const categorySelect = form.querySelector('#inbox-category-select');
+    const objectiveSelect = form.querySelector('#inbox-objective-select');
+    categorySelect.addEventListener('change', () => {
+      const catId = categorySelect.value;
+      const cat = state.categories.find(c => c.id === catId);
+      objectiveSelect.innerHTML = '<option value="">Objetivo</option>' + (cat ? cat.objectives.map(obj => `<option value="${obj.id}">${escapeHtml(obj.title)}</option>`).join('') : '');
+    });
+
+    form.querySelector('#inbox-add-btn').addEventListener('click', () => {
+      const text = form.querySelector('#inbox-note-text').value.trim();
+      const catId = categorySelect.value;
+      const objId = objectiveSelect.value;
+      if (!text) return;
+      state.notes.push({ id: uid(), text, categoryId: catId || '', objectiveId: objId || '', createdAt: new Date().toISOString() });
+      form.querySelector('#inbox-note-text').value = '';
+      categorySelect.value = '';
+      objectiveSelect.innerHTML = '<option value="">Objetivo</option>';
+      scheduleSave();
+      render();
+    });
+
+    const list = document.createElement('div');
+    list.className = 'inbox-items';
+    if (!state.notes.length) {
+      const empty = document.createElement('div');
+      empty.className = 'empty-state';
+      empty.textContent = 'No hay anotaciones emergentes. Guarda ideas rápidas aquí y luego las mandas a una categoría.';
+      list.appendChild(empty);
+    } else {
+      state.notes.forEach(note => {
+        const item = document.createElement('div');
+        item.className = 'inbox-item';
+        const cat = state.categories.find(c => c.id === note.categoryId);
+        const obj = cat && cat.objectives.find(o => o.id === note.objectiveId);
+        item.innerHTML = `
+          <div>
+            <p>${escapeHtml(note.text)}</p>
+            <small>${obj ? `${escapeHtml(cat.name)} · ${escapeHtml(obj.title)}` : 'Sin destino aún'}</small>
+          </div>
+          <div class="inbox-actions">
+            <select data-note-id="${note.id}" data-role="note-target">
+              <option value="">Destino</option>
+              ${state.categories.map(catOption => `<optgroup label="${escapeHtml(catOption.name)}">${catOption.objectives.map(objOption => `<option value="${catOption.id}|${objOption.id}" ${note.categoryId === catOption.id && note.objectiveId === objOption.id ? 'selected' : ''}>${escapeHtml(objOption.title)}</option>`).join('')}</optgroup>`).join('')}
+            </select>
+            <button data-note-id="${note.id}" data-role="note-send">Enviar</button>
+          </div>
+        `;
+        list.appendChild(item);
+      });
+    }
+    panel.appendChild(list);
+
+    list.querySelectorAll('[data-role="note-send"]').forEach(button => {
+      button.addEventListener('click', () => {
+        const noteId = button.dataset.noteId;
+        const note = state.notes.find(n => n.id === noteId);
+        if (!note) return;
+        const select = list.querySelector(`[data-note-id="${noteId}"][data-role="note-target"]`);
+        if (!select || !select.value) return;
+        const [catId, objId] = select.value.split('|');
+        const cat = state.categories.find(c => c.id === catId);
+        const obj = cat && cat.objectives.find(o => o.id === objId);
+        if (!obj) return;
+        obj.tasks.push({ id: uid(), text: note.text, done: false, urgent: false, status: 'backlog' });
+        state.notes = state.notes.filter(n => n.id !== noteId);
+        activeCategoryId = catId;
+        scheduleSave();
+        render();
+      });
+    });
+
+    return panel;
   }
 
   function renderObjective(catId, obj, options = {}){
@@ -1256,174 +1740,91 @@
       return;
     }
 
-    const LEVEL_H = 110;
-    const H_GAP = 20;
-    const NODE_H = 44;
-    const MIN_TASK_W = 130;
-    const MIN_OBJ_W = 155;
-    const MIN_CAT_W = 165;
-    const MIN_ROOT_W = 175;
+    const shell = document.createElement('div');
+    shell.className = 'chart-shell';
 
-    function layoutTasks(tasks){
-      return tasks.map(t => ({ type:'task', data:t, width: MIN_TASK_W, children: [], x:0 }));
-    }
-    function layoutObjectives(objs){
-      return objs.map(o => {
-        const children = layoutTasks(o.tasks);
-        const childrenWidth = children.length ? children.reduce((s,c)=>s+c.width,0) + H_GAP*(children.length-1) : 0;
-        return { type:'objective', data:o, width: Math.max(MIN_OBJ_W, childrenWidth), children, x:0 };
-      });
-    }
-    function layoutCategories(cats){
-      return cats.map((c,i) => {
-        const children = layoutObjectives(c.objectives);
-        const childrenWidth = children.length ? children.reduce((s,c2)=>s+c2.width,0) + H_GAP*(children.length-1) : 0;
-        return { type:'category', data:c, index:i, width: Math.max(MIN_CAT_W, childrenWidth), children, x:0 };
-      });
-    }
+    const root = document.createElement('div');
+    root.className = 'chart-root';
+    root.textContent = 'Organizador';
+    shell.appendChild(root);
 
-    const catNodes = layoutCategories(state.categories);
-    const totalWidth = catNodes.reduce((s,c)=>s+c.width,0) + H_GAP*Math.max(catNodes.length-1,0);
-    const rootWidth = Math.max(MIN_ROOT_W, totalWidth);
+    const columns = document.createElement('div');
+    columns.className = 'chart-columns';
 
-    function assignX(nodes, startX){
-      let cursor = startX;
-      nodes.forEach(n => {
-        n.x = cursor + n.width/2;
-        if (n.children.length){
-          const childrenWidth = n.children.reduce((s,c)=>s+c.width,0) + H_GAP*(n.children.length-1);
-          assignX(n.children, n.x - childrenWidth/2);
-        }
-        cursor += n.width + H_GAP;
-      });
-    }
-    assignX(catNodes, (rootWidth - totalWidth)/2);
+    state.categories.forEach((cat, catIndex) => {
+      const catOpen = Boolean(cat.chartOpen);
+      const catCard = document.createElement('div');
+      catCard.className = 'chart-column';
 
-    let maxDepth = 1;
-    catNodes.forEach(c => {
-      if (c.children.length){
-        maxDepth = Math.max(maxDepth, 2);
-        c.children.forEach(o => { if (o.children.length) maxDepth = Math.max(maxDepth, 3); });
-      }
-    });
-    const totalHeight = maxDepth*LEVEL_H + NODE_H + 30;
-    const rootX = rootWidth/2;
-
-    const svgNS = 'http://www.w3.org/2000/svg';
-    const svg = document.createElementNS(svgNS,'svg');
-    svg.setAttribute('viewBox', `0 0 ${rootWidth} ${totalHeight}`);
-    svg.setAttribute('width', rootWidth);
-    svg.setAttribute('height', totalHeight);
-    svg.style.display = 'block';
-
-    function addLine(x1,y1,x2,y2){
-      const path = document.createElementNS(svgNS,'path');
-      const midY = (y1+y2)/2;
-      path.setAttribute('d', `M ${x1} ${y1} C ${x1} ${midY}, ${x2} ${midY}, ${x2} ${y2}`);
-      path.setAttribute('stroke', 'var(--line)');
-      path.setAttribute('stroke-width', '1.5');
-      path.setAttribute('fill', 'none');
-      svg.appendChild(path);
-    }
-
-    function addNode(x, y, width, label, opts){
-      opts = opts || {};
-      const g = document.createElementNS(svgNS,'g');
-      g.setAttribute('transform', `translate(${x - width/2}, ${y})`);
-      if (opts.onClick){
-        g.style.cursor = 'pointer';
-        g.addEventListener('click', opts.onClick);
-      }
-      const rect = document.createElementNS(svgNS,'rect');
-      rect.setAttribute('width', width);
-      rect.setAttribute('height', NODE_H);
-      rect.setAttribute('rx', 9);
-      rect.setAttribute('fill', opts.fill || 'var(--paper)');
-      rect.setAttribute('stroke', opts.stroke || 'var(--line)');
-      rect.setAttribute('stroke-width', opts.strokeWidth || 1);
-      g.appendChild(rect);
-
-      if (opts.dotColor){
-        const dot = document.createElementNS(svgNS,'circle');
-        dot.setAttribute('cx', 15);
-        dot.setAttribute('cy', NODE_H/2);
-        dot.setAttribute('r', 4.5);
-        dot.setAttribute('fill', opts.dotColor);
-        g.appendChild(dot);
-      }
-
-      const text = document.createElementNS(svgNS,'text');
-      const textX = opts.dotColor ? 27 : width/2;
-      text.setAttribute('x', textX);
-      text.setAttribute('y', NODE_H/2 + 4.5);
-      text.setAttribute('text-anchor', opts.dotColor ? 'start' : 'middle');
-      text.setAttribute('font-family', opts.fontFamily || "'IBM Plex Sans', sans-serif");
-      text.setAttribute('font-size', opts.fontSize || 12.5);
-      text.setAttribute('font-weight', opts.fontWeight || 500);
-      text.setAttribute('fill', opts.textColor || 'var(--ink)');
-      if (opts.strike) text.setAttribute('text-decoration', 'line-through');
-
-      const maxChars = Math.max(4, Math.floor((width - textX - 10) / 6.6));
-      let display = label;
-      if (display.length > maxChars) display = display.slice(0, maxChars - 1) + '…';
-      text.textContent = display;
-
-      const titleEl = document.createElementNS(svgNS,'title');
-      titleEl.textContent = label;
-      g.appendChild(titleEl);
-      g.appendChild(text);
-      svg.appendChild(g);
-    }
-
-    // Nodo raíz
-    addNode(rootX, 0, MIN_ROOT_W, 'Organizador', {
-      fill: 'var(--ink)',
-      textColor: 'var(--paper)',
-      fontFamily: "'Fraunces', serif",
-      fontWeight: 600,
-      fontSize: 14
-    });
-
-    catNodes.forEach(catNode => {
-      const catY = LEVEL_H;
-      const accent = accentFor(catNode.index);
-      addLine(rootX, NODE_H, catNode.x, catY);
-      addNode(catNode.x, catY, catNode.width, catNode.data.name, {
-        dotColor: `var(--${accent})`,
-        fontFamily: "'Fraunces', serif",
-        fontWeight: 600,
-        fontSize: 13.5,
-        strokeWidth: 1.5,
-        onClick: () => { currentView = 'list'; activeCategoryId = catNode.data.id; render(); }
+      const accent = accentFor(catIndex);
+      const catBtn = document.createElement('button');
+      catBtn.type = 'button';
+      catBtn.className = 'chart-category-head';
+      catBtn.style.setProperty('--cat-accent', `var(--${accent})`);
+      const taskTotal = cat.objectives.reduce((sum, obj) => sum + obj.tasks.length, 0);
+      catBtn.innerHTML = `
+        <span>${escapeHtml(cat.name)}</span>
+        <span class="meta">${taskTotal}</span>
+      `;
+      catBtn.addEventListener('click', () => {
+        cat.chartOpen = !cat.chartOpen;
+        render();
       });
 
-      catNode.children.forEach(objNode => {
-        const objY = LEVEL_H*2;
-        addLine(catNode.x, catY+NODE_H, objNode.x, objY);
-        const total = objNode.data.tasks.length;
-        const done = objNode.data.tasks.filter(t=>t.done).length;
-        const allDone = total > 0 && done === total;
-        addNode(objNode.x, objY, objNode.width, objNode.data.title + (total ? `  ${done}/${total}` : ''), {
-          strike: allDone,
-          textColor: allDone ? 'var(--ink-soft)' : 'var(--ink)'
-        });
+      const categoryWrap = document.createElement('div');
+      categoryWrap.className = 'chart-category';
+      categoryWrap.style.setProperty('--cat-accent', `var(--${accent})`);
+      categoryWrap.appendChild(catBtn);
 
-        objNode.children.forEach(taskNode => {
-          const taskY = LEVEL_H*3;
-          addLine(objNode.x, objY+NODE_H, taskNode.x, taskY);
-          addNode(taskNode.x, taskY, taskNode.width, taskNode.data.text, {
-            fill: taskNode.data.done ? 'var(--paper-dim)' : (taskNode.data.urgent ? 'rgba(181,83,60,0.08)' : '#fff'),
-            stroke: taskNode.data.urgent ? 'rgba(181,83,60,0.65)' : 'var(--line)',
-            strike: taskNode.data.done,
-            textColor: taskNode.data.done ? 'var(--ink-soft)' : 'var(--ink)',
-            fontSize: 11.5,
-            onClick: () => focusTaskInList(catNode.data.id, objNode.data.id, taskNode.data.id)
+      if (catOpen) {
+        const objectives = document.createElement('div');
+        objectives.className = 'chart-objectives';
+
+        cat.objectives.forEach(obj => {
+          const objOpen = Boolean(obj.chartOpen);
+          const objective = document.createElement('div');
+          objective.className = 'chart-objective';
+
+          const objBtn = document.createElement('button');
+          objBtn.type = 'button';
+          objBtn.className = 'chart-objective-head';
+          const done = obj.tasks.filter(t => t.done).length;
+          objBtn.innerHTML = `
+            <span class="label">${escapeHtml(obj.title)}</span>
+            <span class="count">${done}/${obj.tasks.length}</span>
+          `;
+          objBtn.addEventListener('click', () => {
+            obj.chartOpen = !obj.chartOpen;
+            render();
           });
+          objective.appendChild(objBtn);
+
+          if (objOpen) {
+            const tasks = document.createElement('div');
+            tasks.className = 'chart-tasks';
+            obj.tasks.forEach(task => {
+              const taskBtn = document.createElement('button');
+              taskBtn.type = 'button';
+              taskBtn.className = 'chart-task' + (task.urgent && !task.done ? ' urgent' : '') + (task.done ? ' done' : '');
+              taskBtn.textContent = task.text;
+              taskBtn.addEventListener('click', () => focusTaskInList(cat.id, obj.id, task.id));
+              tasks.appendChild(taskBtn);
+            });
+            objective.appendChild(tasks);
+          }
+
+          objectives.appendChild(objective);
         });
-      });
+
+        categoryWrap.appendChild(objectives);
+      }
+
+      catCard.appendChild(categoryWrap);
+      columns.appendChild(catCard);
     });
 
-    container.appendChild(svg);
+    shell.appendChild(columns);
+    container.appendChild(shell);
   }
 
   function updateFooter(){
