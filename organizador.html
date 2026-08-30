@@ -279,6 +279,39 @@
   }
   .add-objective button:hover{background:#33414d;}
 
+  .filter-row{
+    display:flex;
+    flex-wrap:wrap;
+    gap:8px;
+    margin:0 0 18px;
+    max-width:640px;
+  }
+  .filter-pill{
+    border:1px solid var(--line);
+    background:var(--paper);
+    color:var(--ink-soft);
+    border-radius:999px;
+    padding:7px 12px;
+    font-size:12px;
+    font-weight:600;
+    cursor:pointer;
+    transition:all .15s ease;
+  }
+  .filter-pill.active{
+    background:var(--ink);
+    color:var(--paper);
+    border-color:var(--ink);
+  }
+  .filter-pill .dot{
+    display:inline-block;
+    width:8px;
+    height:8px;
+    border-radius:50%;
+    margin-right:6px;
+    vertical-align:middle;
+  }
+  .filter-pill[data-filter="urgent"] .dot{ background:var(--danger); }
+
   /* ---------- Objective card ---------- */
   .objective{
     background:var(--paper);
@@ -358,9 +391,14 @@
     display:flex;
     align-items:center;
     gap:10px;
-    padding:6px 0;
-    border-radius:8px;
+    padding:8px 10px;
+    border-radius:10px;
+    border:1px solid transparent;
     transition:background-color .15s ease, box-shadow .15s ease, border-color .15s ease;
+  }
+  .task-row.task-row--urgent{
+    background:rgba(181, 83, 60, 0.06);
+    border-color:rgba(181, 83, 60, 0.2);
   }
   .task-row.task-row--focus{
     background:rgba(200, 150, 30, 0.08);
@@ -382,6 +420,38 @@
     word-break:break-word;
   }
   .task-text.done{color:var(--ink-soft); text-decoration:line-through;}
+  .task-meta{
+    display:flex;
+    align-items:center;
+    gap:8px;
+    flex-shrink:0;
+  }
+  .urgent-badge,
+  .urgent-toggle{
+    border:none;
+    border-radius:999px;
+    font-size:11px;
+    font-weight:700;
+    letter-spacing:.04em;
+    text-transform:uppercase;
+    cursor:pointer;
+  }
+  .urgent-badge{
+    background:rgba(181, 83, 60, 0.12);
+    color:var(--danger);
+    padding:5px 8px;
+  }
+  .urgent-toggle{
+    background:transparent;
+    color:var(--ink-soft);
+    padding:5px 7px;
+    border:1px solid var(--line);
+  }
+  .urgent-toggle.urgent-active{
+    background:var(--danger);
+    color:#fff;
+    border-color:var(--danger);
+  }
   .task-del{
     border:none; background:none; color:var(--ink-soft); cursor:pointer; font-size:13px; opacity:0; flex-shrink:0;
   }
@@ -471,10 +541,26 @@
       border-radius:8px;
       border-right:1px solid var(--line);
       margin:0;
+      width:calc(50% - 4px);
+      min-width:0;
     }
     .cat-tab.active::after{display:none;}
+    .cat-tab .name{font-size:13px;}
     .add-cat{padding-right:0; width:100%; margin-top:12px;}
     main.content{padding:20px 18px 50px;}
+    .content-header h2{font-size:22px;}
+    .objective{max-width:none;}
+    .objective-head{padding:14px 12px; gap:10px;}
+    .objective-title{font-size:15px;}
+    .task-row{padding:8px 6px; gap:8px;}
+    .task-text{font-size:13px;}
+    .task-meta{gap:6px;}
+    .urgent-badge{padding:4px 6px; font-size:10px;}
+    .urgent-toggle{padding:4px 6px; font-size:10px;}
+    .view-toggle{width:100%; justify-content:stretch;}
+    .view-toggle button{flex:1;}
+    .sync-status{width:100%; justify-content:space-between; flex-wrap:wrap;}
+    .statusbar{padding:8px 14px; gap:8px; flex-wrap:wrap;}
   }
 
   :focus-visible{outline:2px solid var(--gold); outline-offset:2px;}
@@ -554,6 +640,7 @@
   let saveTimer = null;
   let currentView = 'list'; // 'list' | 'chart'
   let focusTaskId = null;
+  let urgentFilter = 'all';
 
   const ORGANIZER_SEED = [
     {
@@ -565,14 +652,14 @@
           title: 'Estudios médicos y controles',
           open: true,
           tasks: [
-            { id: 'task-salud-1', text: 'Exámenes de Sra Nena', done: false },
-            { id: 'task-salud-2', text: 'Examen de sangre', done: false },
-            { id: 'task-salud-3', text: 'RNM lumbosacra', done: false },
-            { id: 'task-salud-4', text: 'TAC tórax, abdomen y pelvis', done: false },
-            { id: 'task-salud-5', text: 'Fisiatría derivada lumbosacra', done: false },
-            { id: 'task-salud-6', text: 'Rut Sra Nena 7.184.918-k', done: false },
-            { id: 'task-salud-7', text: 'Hoja del Cefam: resonancia e imagenología', done: false },
-            { id: 'task-salud-8', text: 'Orden de resonancia y TAC', done: false }
+            { id: 'task-salud-1', text: 'Exámenes de Sra Nena', done: false, urgent: true },
+            { id: 'task-salud-2', text: 'Examen de sangre', done: false, urgent: true },
+            { id: 'task-salud-3', text: 'RNM lumbosacra', done: false, urgent: true },
+            { id: 'task-salud-4', text: 'TAC tórax, abdomen y pelvis', done: false, urgent: true },
+            { id: 'task-salud-5', text: 'Fisiatría derivada lumbosacra', done: false, urgent: false },
+            { id: 'task-salud-6', text: 'Rut Sra Nena 7.184.918-k', done: false, urgent: false },
+            { id: 'task-salud-7', text: 'Hoja del Cefam: resonancia e imagenología', done: false, urgent: false },
+            { id: 'task-salud-8', text: 'Orden de resonancia y TAC', done: false, urgent: false }
           ]
         }
       ]
@@ -586,14 +673,14 @@
           title: 'Trámites y organización del hogar',
           open: true,
           tasks: [
-            { id: 'task-hogar-1', text: 'SII mensual septiembre y contribuciones', done: false },
-            { id: 'task-hogar-2', text: 'Revisar registro del aeropuerto en el CRIN', done: false },
-            { id: 'task-hogar-3', text: 'Pagarle a Jaime Kramm', done: false },
-            { id: 'task-hogar-4', text: 'Revisar la cotización', done: false },
-            { id: 'task-hogar-5', text: 'Ver sirena para la casa', done: false },
-            { id: 'task-hogar-6', text: 'Comprar otro ventilador con sensor de humedad', done: false },
-            { id: 'task-hogar-7', text: 'Arreglar impresora Brother con pc', done: false },
-            { id: 'task-hogar-8', text: 'Revisar coti y documentos del CRIN', done: false }
+            { id: 'task-hogar-1', text: 'SII mensual septiembre y contribuciones', done: false, urgent: true },
+            { id: 'task-hogar-2', text: 'Revisar registro del aeropuerto en el CRIN', done: false, urgent: false },
+            { id: 'task-hogar-3', text: 'Pagarle a Jaime Kramm', done: false, urgent: true },
+            { id: 'task-hogar-4', text: 'Revisar la cotización', done: false, urgent: false },
+            { id: 'task-hogar-5', text: 'Ver sirena para la casa', done: false, urgent: false },
+            { id: 'task-hogar-6', text: 'Comprar otro ventilador con sensor de humedad', done: false, urgent: false },
+            { id: 'task-hogar-7', text: 'Arreglar impresora Brother con pc', done: false, urgent: false },
+            { id: 'task-hogar-8', text: 'Revisar coti y documentos del CRIN', done: false, urgent: false }
           ]
         }
       ]
@@ -607,15 +694,15 @@
           title: 'Desarrollo profesional y contenidos',
           open: true,
           tasks: [
-            { id: 'task-trabajo-1', text: 'Terminar editoriales', done: false },
-            { id: 'task-trabajo-2', text: 'Actualizar currículum', done: false },
-            { id: 'task-trabajo-3', text: 'Cuadernos pedagógicos violeta y jaivas', done: false },
-            { id: 'task-trabajo-4', text: 'Vinculación con el medio ambiente', done: false },
-            { id: 'task-trabajo-5', text: 'Bibliografía', done: false },
-            { id: 'task-trabajo-6', text: 'Definir objetivos específicos', done: false },
-            { id: 'task-trabajo-7', text: 'Evaluar qué reacción tienen los estudiantes', done: false },
-            { id: 'task-trabajo-8', text: 'Preparar la pregunta de investigación', done: false },
-            { id: 'task-trabajo-9', text: 'Cuaderno del patrimonio', done: false }
+            { id: 'task-trabajo-1', text: 'Terminar editoriales', done: false, urgent: true },
+            { id: 'task-trabajo-2', text: 'Actualizar currículum', done: false, urgent: false },
+            { id: 'task-trabajo-3', text: 'Cuadernos pedagógicos violeta y jaivas', done: false, urgent: false },
+            { id: 'task-trabajo-4', text: 'Vinculación con el medio ambiente', done: false, urgent: false },
+            { id: 'task-trabajo-5', text: 'Bibliografía', done: false, urgent: false },
+            { id: 'task-trabajo-6', text: 'Definir objetivos específicos', done: false, urgent: false },
+            { id: 'task-trabajo-7', text: 'Evaluar qué reacción tienen los estudiantes', done: false, urgent: false },
+            { id: 'task-trabajo-8', text: 'Preparar la pregunta de investigación', done: false, urgent: true },
+            { id: 'task-trabajo-9', text: 'Cuaderno del patrimonio', done: false, urgent: false }
           ]
         }
       ]
@@ -668,12 +755,12 @@
           title: 'Mejoras y preparación de la app QMV',
           open: true,
           tasks: [
-            { id: 'task-qmv-1', text: 'Agregar la carta de QR en los 2 saltos faltantes', done: false },
-            { id: 'task-qmv-2', text: 'Cuando alguien juega solo, agregar un bot', done: false },
-            { id: 'task-qmv-3', text: 'Sacar la vaca tecnológica y la vaca del tablero', done: false },
-            { id: 'task-qmv-4', text: 'Todos cambian a la derecha', done: false },
-            { id: 'task-qmv-5', text: 'Probar la VR', done: false },
-            { id: 'task-qmv-6', text: 'Resolver lo del cumpleaños de Romu con Eli', done: false }
+            { id: 'task-qmv-1', text: 'Agregar la carta de QR en los 2 saltos faltantes', done: false, urgent: false },
+            { id: 'task-qmv-2', text: 'Cuando alguien juega solo, agregar un bot', done: false, urgent: false },
+            { id: 'task-qmv-3', text: 'Sacar la vaca tecnológica y la vaca del tablero', done: false, urgent: false },
+            { id: 'task-qmv-4', text: 'Todos cambian a la derecha', done: false, urgent: false },
+            { id: 'task-qmv-5', text: 'Probar la VR', done: false, urgent: true },
+            { id: 'task-qmv-6', text: 'Resolver lo del cumpleaños de Romu con Eli', done: false, urgent: true }
           ]
         }
       ]
@@ -687,12 +774,12 @@
           title: 'Eventos, contacto y organización',
           open: true,
           tasks: [
-            { id: 'task-social-1', text: 'Hablar de rayuela en el Lero e invitar a Luis Cotal', done: false },
-            { id: 'task-social-2', text: 'Invitar a Lore y Benja a la ludoteca', done: false },
-            { id: 'task-social-3', text: 'Socializar horario de ludoteca y grupos por WhatsApp', done: false },
-            { id: 'task-social-4', text: 'Armar reunión para la otra semana con Christian Torres', done: false },
-            { id: 'task-social-5', text: 'Ir al Greed hoy viernes 22:30', done: false },
-            { id: 'task-social-6', text: 'Revisar la lista de Santa', done: false }
+            { id: 'task-social-1', text: 'Hablar de rayuela en el Lero e invitar a Luis Cotal', done: false, urgent: false },
+            { id: 'task-social-2', text: 'Invitar a Lore y Benja a la ludoteca', done: false, urgent: false },
+            { id: 'task-social-3', text: 'Socializar horario de ludoteca y grupos por WhatsApp', done: false, urgent: false },
+            { id: 'task-social-4', text: 'Armar reunión para la otra semana con Christian Torres', done: false, urgent: true },
+            { id: 'task-social-5', text: 'Ir al Greed hoy viernes 22:30', done: false, urgent: true },
+            { id: 'task-social-6', text: 'Revisar la lista de Santa', done: false, urgent: false }
           ]
         }
       ]
@@ -868,7 +955,7 @@
     const cat = state.categories.find(c => c.id === catId);
     const obj = cat && cat.objectives.find(o => o.id === objId);
     if (!obj) return;
-    obj.tasks.push({ id: uid(), text, done:false });
+    obj.tasks.push({ id: uid(), text, done:false, urgent:false });
     scheduleSave();
     render();
   }
@@ -878,6 +965,15 @@
     const task = obj && obj.tasks.find(t => t.id === taskId);
     if (!task) return;
     task.done = !task.done;
+    scheduleSave();
+    render();
+  }
+  function toggleTaskUrgent(catId, objId, taskId){
+    const cat = state.categories.find(c => c.id === catId);
+    const obj = cat && cat.objectives.find(o => o.id === objId);
+    const task = obj && obj.tasks.find(t => t.id === taskId);
+    if (!task) return;
+    task.urgent = !task.urgent;
     scheduleSave();
     render();
   }
@@ -995,6 +1091,21 @@
     header.innerHTML = `<span class="dot" style="background:var(--${accent})"></span><h2 class="display">${escapeHtml(cat.name)}</h2>`;
     content.appendChild(header);
 
+    const filterRow = document.createElement('div');
+    filterRow.className = 'filter-row';
+    filterRow.innerHTML = `
+      <button class="filter-pill ${urgentFilter === 'all' ? 'active' : ''}" data-filter="all"><span class="dot"></span>Todas</button>
+      <button class="filter-pill ${urgentFilter === 'urgent' ? 'active' : ''}" data-filter="urgent"><span class="dot"></span>Urgentes</button>
+      <button class="filter-pill ${urgentFilter === 'pending' ? 'active' : ''}" data-filter="pending"><span class="dot"></span>Pendientes</button>
+    `;
+    content.appendChild(filterRow);
+    filterRow.querySelectorAll('.filter-pill').forEach(button => {
+      button.addEventListener('click', () => {
+        urgentFilter = button.dataset.filter;
+        render();
+      });
+    });
+
     const addObj = document.createElement('div');
     addObj.className = 'add-objective';
     addObj.innerHTML = `
@@ -1015,7 +1126,16 @@
     }
 
     cat.objectives.forEach(obj => {
-      content.appendChild(renderObjective(cat.id, obj));
+      const visibleTasks = obj.tasks.filter(task => {
+        if (urgentFilter === 'urgent') return task.urgent && !task.done;
+        if (urgentFilter === 'pending') return !task.done;
+        return true;
+      });
+      if (urgentFilter !== 'all' && visibleTasks.length === 0 && obj.tasks.length === 0) {
+        return;
+      }
+      const filteredObj = { ...obj, tasks: visibleTasks };
+      content.appendChild(renderObjective(cat.id, filteredObj, { isFiltered: urgentFilter !== 'all' }));
     });
 
     updateFooter();
@@ -1028,7 +1148,7 @@
     addObjective(catId, title);
   }
 
-  function renderObjective(catId, obj){
+  function renderObjective(catId, obj, options = {}){
     const wrap = document.createElement('div');
     wrap.className = 'objective' + (obj.open ? ' open' : '');
 
@@ -1075,17 +1195,23 @@
     tasksWrap.className = 'tasks';
     obj.tasks.forEach(task => {
       const row = document.createElement('div');
-      row.className = 'task-row';
+      row.className = 'task-row' + (task.urgent && !task.done ? ' task-row--urgent' : '');
       row.dataset.taskId = task.id;
       if (focusTaskId && focusTaskId === task.id) {
         row.classList.add('task-row--focus');
       }
+      const urgentMarkup = task.urgent && !task.done ? '<span class="urgent-badge">Urgente</span>' : '';
       row.innerHTML = `
         <input type="checkbox" ${task.done ? 'checked' : ''} data-action="toggle-task" data-task="${task.id}">
         <span class="task-text${task.done ? ' done' : ''}">${escapeHtml(task.text)}</span>
+        <div class="task-meta">
+          ${urgentMarkup}
+          <button class="urgent-toggle ${task.urgent ? 'urgent-active' : ''}" data-action="toggle-urgent" data-task="${task.id}" title="Marcar como urgente">Urg.</button>
+        </div>
         <button class="task-del" title="Eliminar tarea" data-action="del-task" data-task="${task.id}">✕</button>
       `;
       row.querySelector('[data-action="toggle-task"]').addEventListener('change', () => toggleTask(catId, obj.id, task.id));
+      row.querySelector('[data-action="toggle-urgent"]').addEventListener('click', () => toggleTaskUrgent(catId, obj.id, task.id));
       row.querySelector('[data-action="del-task"]').addEventListener('click', () => deleteTask(catId, obj.id, task.id));
       tasksWrap.appendChild(row);
     });
@@ -1286,7 +1412,8 @@
           const taskY = LEVEL_H*3;
           addLine(objNode.x, objY+NODE_H, taskNode.x, taskY);
           addNode(taskNode.x, taskY, taskNode.width, taskNode.data.text, {
-            fill: taskNode.data.done ? 'var(--paper-dim)' : '#fff',
+            fill: taskNode.data.done ? 'var(--paper-dim)' : (taskNode.data.urgent ? 'rgba(181,83,60,0.08)' : '#fff'),
+            stroke: taskNode.data.urgent ? 'rgba(181,83,60,0.65)' : 'var(--line)',
             strike: taskNode.data.done,
             textColor: taskNode.data.done ? 'var(--ink-soft)' : 'var(--ink)',
             fontSize: 11.5,
