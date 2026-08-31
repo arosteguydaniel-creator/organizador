@@ -869,6 +869,44 @@
     color:var(--ink-soft);
     text-decoration:line-through;
   }
+  .chart-task-editor{
+    display:flex;
+    align-items:center;
+    gap:8px;
+    width:100%;
+    border:1px solid rgba(28,37,45,0.18);
+    border-radius:9px;
+    background:rgba(255,255,255,0.82);
+    padding:6px 8px;
+  }
+  .chart-task-input{
+    flex:1;
+    min-width:0;
+    border:none;
+    background:transparent;
+    color:var(--ink);
+    font:inherit;
+    font-size:11.5px;
+    line-height:1.35;
+    padding:4px 0;
+  }
+  .chart-task-input:focus{outline:none;}
+  .chart-task-actions{
+    display:flex;
+    gap:4px;
+  }
+  .chart-task-actions button{
+    border:1px solid rgba(28,37,45,0.18);
+    background:#fff;
+    color:var(--ink);
+    border-radius:6px;
+    width:22px;
+    height:22px;
+    padding:0;
+    cursor:pointer;
+    font-size:11px;
+    line-height:1;
+  }
   .chart-empty{
     color:var(--ink-soft);
     font-size:14px;
@@ -1389,6 +1427,79 @@
     }
   }
 
+  function editTaskInline(catId, objId, taskId, triggerElement){
+    const cat = state.categories.find(c => c.id === catId);
+    const obj = cat && cat.objectives.find(o => o.id === objId);
+    const task = obj && obj.tasks.find(t => t.id === taskId);
+    if (!task || !triggerElement) return;
+
+    const editor = document.createElement('div');
+    editor.className = 'chart-task-editor';
+
+    const input = document.createElement('input');
+    input.type = 'text';
+    input.value = task.text;
+    input.className = 'chart-task-input';
+    input.setAttribute('aria-label', 'Editar tarea');
+
+    const actions = document.createElement('div');
+    actions.className = 'chart-task-actions';
+
+    const deleteBtn = document.createElement('button');
+    deleteBtn.type = 'button';
+    deleteBtn.title = 'Eliminar tarea';
+    deleteBtn.textContent = 'X';
+
+    function saveEditedTask(){
+      const nextText = input.value.trim();
+      if (!nextText) {
+        input.focus();
+        return;
+      }
+      task.text = nextText;
+      scheduleSave();
+      render();
+    }
+
+    function deleteCurrentTask(){
+      obj.tasks = obj.tasks.filter(t => t.id !== taskId);
+      scheduleSave();
+      render();
+    }
+
+    deleteBtn.addEventListener('mousedown', (e) => {
+      e.preventDefault();
+      deleteCurrentTask();
+    });
+    deleteBtn.addEventListener('click', (e) => {
+      e.stopPropagation();
+    });
+    input.addEventListener('blur', () => {
+      saveEditedTask();
+    });
+    input.addEventListener('keydown', (e) => {
+      if (e.key === 'Enter') {
+        e.preventDefault();
+        saveEditedTask();
+      }
+      if (e.key === 'Escape') {
+        input.value = task.text;
+        render();
+      }
+    });
+
+    actions.appendChild(deleteBtn);
+    editor.appendChild(input);
+    editor.appendChild(actions);
+
+    const parent = triggerElement.parentElement;
+    if (parent) {
+      parent.replaceChild(editor, triggerElement);
+      input.focus();
+      input.setSelectionRange(input.value.length, input.value.length);
+    }
+  }
+
   // ---------- Render ----------
   function render(){
     document.getElementById('view-list-btn').classList.toggle('active', currentView === 'list');
@@ -1807,7 +1918,7 @@
               taskBtn.type = 'button';
               taskBtn.className = 'chart-task' + (task.urgent && !task.done ? ' urgent' : '') + (task.done ? ' done' : '');
               taskBtn.textContent = task.text;
-              taskBtn.addEventListener('click', () => focusTaskInList(cat.id, obj.id, task.id));
+              taskBtn.addEventListener('click', () => editTaskInline(cat.id, obj.id, task.id, taskBtn));
               tasks.appendChild(taskBtn);
             });
             objective.appendChild(tasks);
