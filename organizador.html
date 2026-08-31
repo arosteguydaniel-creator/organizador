@@ -1665,23 +1665,42 @@
         urgentTasks.forEach(({ category, objective, task }) => {
           const item = document.createElement('div');
           item.className = 'urgent-item';
-          item.innerHTML = `
-            <div class="urgent-item__meta">${escapeHtml(category.name)} · ${escapeHtml(objective.title)}</div>
-            <div class="urgent-item__row">
-              <input type="checkbox" data-action="toggle-task" data-cat="${category.id}" data-obj="${objective.id}" data-task="${task.id}" ${task.done ? 'checked' : ''}>
-              <span class="task-text">${escapeHtml(task.text)}</span>
-              <button class="task-del" title="Eliminar tarea" data-action="del-task" data-cat="${category.id}" data-obj="${objective.id}" data-task="${task.id}">✕</button>
-            </div>
-          `;
 
-          item.querySelector('[data-action="toggle-task"]').addEventListener('change', (event) => {
-            const target = event.target;
-            toggleTask(target.dataset.cat, target.dataset.obj, target.dataset.task);
-          });
-          item.querySelector('[data-action="del-task"]').addEventListener('click', (event) => {
-            const button = event.currentTarget;
-            deleteTask(button.dataset.cat, button.dataset.obj, button.dataset.task);
-          });
+          const meta = document.createElement('div');
+          meta.className = 'urgent-item__meta';
+          meta.textContent = `${category.name} · ${objective.title}`;
+
+          const row = document.createElement('div');
+          row.className = 'urgent-item__row';
+
+          const checkbox = document.createElement('input');
+          checkbox.type = 'checkbox';
+          checkbox.checked = Boolean(task.done);
+          checkbox.dataset.action = 'toggle-task';
+          checkbox.dataset.cat = category.id;
+          checkbox.dataset.obj = objective.id;
+          checkbox.dataset.task = task.id;
+          checkbox.addEventListener('change', () => toggleTask(category.id, objective.id, task.id));
+
+          const taskText = document.createElement('span');
+          taskText.className = 'task-text';
+          taskText.textContent = task.text;
+          taskText.style.cursor = 'pointer';
+          taskText.title = 'Editar tarea';
+          taskText.addEventListener('click', () => editTaskInline(category.id, objective.id, task.id, taskText));
+
+          const deleteBtn = document.createElement('button');
+          deleteBtn.type = 'button';
+          deleteBtn.className = 'task-del';
+          deleteBtn.title = 'Eliminar tarea';
+          deleteBtn.textContent = '✕';
+          deleteBtn.addEventListener('click', () => deleteTask(category.id, objective.id, task.id));
+
+          row.appendChild(checkbox);
+          row.appendChild(taskText);
+          row.appendChild(deleteBtn);
+          item.appendChild(meta);
+          item.appendChild(row);
           urgentList.appendChild(item);
         });
       }
