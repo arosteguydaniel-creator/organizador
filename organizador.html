@@ -311,6 +311,44 @@
     vertical-align:middle;
   }
   .filter-pill[data-filter="urgent"] .dot{ background:var(--danger); }
+  .urgent-list{
+    display:grid;
+    gap:10px;
+    max-width:640px;
+    margin-top:18px;
+  }
+  .urgent-item{
+    background:rgba(255,255,255,0.45);
+    border:1px solid var(--line);
+    border-radius:12px;
+    padding:12px 14px;
+  }
+  .urgent-item__meta{
+    color:var(--ink-soft);
+    font-size:12px;
+    margin-bottom:8px;
+  }
+  .urgent-item__row{
+    display:flex;
+    align-items:center;
+    gap:10px;
+  }
+  .urgent-item__row input[type=checkbox]{
+    width:16px;
+    height:16px;
+    accent-color:var(--teal);
+    flex-shrink:0;
+    cursor:pointer;
+  }
+  .urgent-item__row .task-text{
+    flex:1;
+    min-width:0;
+    font-size:14px;
+    word-break:break-word;
+  }
+  .urgent-item__row .task-del{
+    border:none; background:none; color:var(--ink-soft); cursor:pointer; font-size:13px; opacity:1; flex-shrink:0;
+  }
 
   /* ---------- Objective card ---------- */
   .objective{
@@ -1583,7 +1621,8 @@
 
     const header = document.createElement('div');
     header.className = 'content-header';
-    header.innerHTML = `<span class="dot" style="background:var(--${accent})"></span><h2 class="display">${escapeHtml(cat.name)}</h2>`;
+    const headerTitle = urgentFilter === 'urgent' ? 'Urgentes' : cat.name;
+    header.innerHTML = `<span class="dot" style="background:var(--${urgentFilter === 'urgent' ? 'danger' : accent})"></span><h2 class="display">${escapeHtml(headerTitle)}</h2>`;
     content.appendChild(header);
 
     content.appendChild(renderInboxPanel());
@@ -1593,7 +1632,6 @@
     filterRow.innerHTML = `
       <button class="filter-pill ${urgentFilter === 'all' ? 'active' : ''}" data-filter="all"><span class="dot"></span>Todas</button>
       <button class="filter-pill ${urgentFilter === 'urgent' ? 'active' : ''}" data-filter="urgent"><span class="dot"></span>Urgentes</button>
-      <button class="filter-pill ${urgentFilter === 'pending' ? 'active' : ''}" data-filter="pending"><span class="dot"></span>Pendientes</button>
     `;
     content.appendChild(filterRow);
     filterRow.querySelectorAll('.filter-pill').forEach(button => {
@@ -1602,6 +1640,56 @@
         render();
       });
     });
+
+    if (urgentFilter === 'urgent') {
+      const urgentTasks = [];
+      state.categories.forEach(category => {
+        category.objectives.forEach(objective => {
+          objective.tasks.forEach(task => {
+            if (task.urgent && !task.done) {
+              urgentTasks.push({ category, objective, task });
+            }
+          });
+        });
+      });
+
+      const urgentList = document.createElement('div');
+      urgentList.className = 'urgent-list';
+
+      if (!urgentTasks.length) {
+        const empty = document.createElement('div');
+        empty.className = 'empty-state';
+        empty.textContent = 'No hay tareas urgentes pendientes.';
+        urgentList.appendChild(empty);
+      } else {
+        urgentTasks.forEach(({ category, objective, task }) => {
+          const item = document.createElement('div');
+          item.className = 'urgent-item';
+          item.innerHTML = `
+            <div class="urgent-item__meta">${escapeHtml(category.name)} · ${escapeHtml(objective.title)}</div>
+            <div class="urgent-item__row">
+              <input type="checkbox" data-action="toggle-task" data-cat="${category.id}" data-obj="${objective.id}" data-task="${task.id}" ${task.done ? 'checked' : ''}>
+              <span class="task-text">${escapeHtml(task.text)}</span>
+              <button class="task-del" title="Eliminar tarea" data-action="del-task" data-cat="${category.id}" data-obj="${objective.id}" data-task="${task.id}">✕</button>
+            </div>
+          `;
+
+          item.querySelector('[data-action="toggle-task"]').addEventListener('change', (event) => {
+            const target = event.target;
+            toggleTask(target.dataset.cat, target.dataset.obj, target.dataset.task);
+          });
+          item.querySelector('[data-action="del-task"]').addEventListener('click', (event) => {
+            const button = event.currentTarget;
+            deleteTask(button.dataset.cat, button.dataset.obj, button.dataset.task);
+          });
+          urgentList.appendChild(item);
+        });
+      }
+
+      content.appendChild(urgentList);
+      updateFooter();
+      return;
+    }
 
     const addObj = document.createElement('div');
     addObj.className = 'add-objective';
@@ -1624,7 +1712,6 @@
 
     cat.objectives.forEach(obj => {
       const visibleTasks = obj.tasks.filter(task => {
-        if (urgentFilter === 'urgent') return task.urgent && !task.done;
         if (urgentFilter === 'pending') return !task.done;
         return true;
       });
