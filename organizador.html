@@ -1246,9 +1246,12 @@
   }
 
   // ---------- Setup / código de sincronización ----------
+  function normalizeCode(code){
+    return (code || '').trim().toLowerCase();
+  }
   function getCodeFromUrl(){
     const params = new URLSearchParams(window.location.search);
-    return params.get('code');
+    return normalizeCode(params.get('code'));
   }
   function setCodeInUrl(code){
     const url = new URL(window.location.href);
@@ -1271,7 +1274,7 @@
   });
   function submitCode(){
     const input = document.getElementById('code-input');
-    const code = input.value.trim();
+    const code = normalizeCode(input.value);
     if (!code){
       document.getElementById('setup-error').textContent = 'Escribe un código antes de continuar.';
       return;
